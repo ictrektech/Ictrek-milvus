@@ -29,7 +29,22 @@ if [[ "${1-}" == "down" ]]; then
     exit 0
 fi
 
-PLATFORM_ARCH="${PLATFORM_ARCH:-${IMAGE_ARCH}}"
+# 优先使用 TARGETARCH 环境变量，其次使用 PLATFORM_ARCH，最后使用 IMAGE_ARCH
+if [ -n "$TARGETARCH" ]; then
+    PLATFORM_ARCH="$TARGETARCH"
+elif [ -n "$PLATFORM_ARCH" ]; then
+    PLATFORM_ARCH="$PLATFORM_ARCH"
+elif [ -n "$IMAGE_ARCH" ]; then
+    PLATFORM_ARCH="$IMAGE_ARCH"
+else
+    # 自动检测
+    MACHINE=$(uname -m)
+    if [ "$MACHINE" = "x86_64" ]; then
+        PLATFORM_ARCH="amd64"
+    else
+        PLATFORM_ARCH="arm64"
+    fi
+fi
 
 export IMAGE_ARCH=${PLATFORM_ARCH}
 

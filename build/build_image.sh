@@ -33,7 +33,10 @@ OS_NAME="${OS_NAME:-ubuntu20.04}"
 MILVUS_IMAGE_REPO="${MILVUS_IMAGE_REPO:-milvusdb/milvus}"
 MILVUS_IMAGE_TAG="${MILVUS_IMAGE_TAG:-latest}"
 
-if [ -z "$IMAGE_ARCH" ]; then
+# 优先使用 TARGETARCH 环境变量，其次使用 IMAGE_ARCH，最后自动检测
+if [ -n "$TARGETARCH" ]; then
+    IMAGE_ARCH="$TARGETARCH"
+elif [ -z "$IMAGE_ARCH" ]; then
     MACHINE=$(uname -m)
     if [ "$MACHINE" = "x86_64" ]; then
         IMAGE_ARCH="amd64"

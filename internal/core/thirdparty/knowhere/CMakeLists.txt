@@ -14,8 +14,11 @@
 # Update KNOWHERE_VERSION for the first occurrence
 milvus_add_pkg_config("knowhere")
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES "")
-set( KNOWHERE_VERSION v2.6.9 )
-set( GIT_REPOSITORY  "https://github.com/zilliztech/knowhere.git")
+# set( KNOWHERE_VERSION v2.6.9 )
+# set( GIT_REPOSITORY  "https://github.com/zilliztech/knowhere.git")
+
+set( KNOWHERE_VERSION 2a6441f5947b991655a74464adabcc3133592ea0 )
+set( GIT_REPOSITORY  "https://github.com/QinSa-ChengDU/knowhere.git")
 
 message(STATUS "Knowhere repo: ${GIT_REPOSITORY}")
 message(STATUS "Knowhere version: ${KNOWHERE_VERSION}")
@@ -28,6 +31,10 @@ if ( BUILD_DISK_ANN STREQUAL "ON" )
 else ()
     set(WITH_DISKANN OFF CACHE BOOL "" FORCE )
 endif ()
+
+# Enable OdinANN index - always ON for disk-based index support
+set(WITH_ODINANN ON CACHE BOOL "" FORCE )
+message(STATUS "Building with OdinANN index support: ${WITH_ODINANN}")
 
 if ( INDEX_ENGINE STREQUAL "cardinal" )
     set(WITH_CARDINAL ON CACHE BOOL "" FORCE )

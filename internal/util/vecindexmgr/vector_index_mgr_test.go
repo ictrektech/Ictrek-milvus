@@ -81,6 +81,17 @@ func Test_VecIndex_DataType_Support(t *testing.T) {
 			wants: []bool{true, false, true, true, false},
 		},
 		{
+			indexType: "ODINANN",
+			dataTypes: []schemapb.DataType{
+				schemapb.DataType_FloatVector,
+				schemapb.DataType_BinaryVector,
+				schemapb.DataType_BFloat16Vector,
+				schemapb.DataType_Float16Vector,
+				schemapb.DataType_SparseFloatVector,
+			},
+			wants: []bool{true, false, true, true, false},
+		},
+		{
 			indexType: "UNKNOWN",
 			dataTypes: []schemapb.DataType{
 				schemapb.DataType_FloatVector,
@@ -142,6 +153,10 @@ func Test_VecIndex_IsNoTrainIndex(t *testing.T) {
 			want:      false,
 		},
 		{
+			indexType: "ODINANN",
+			want:      false,
+		},
+		{
 			indexType: "UNKNOWN",
 			want:      false,
 		},
@@ -175,6 +190,10 @@ func Test_VecIndex_IsDiskVecIndex(t *testing.T) {
 		},
 		{
 			indexType: "DISKANN",
+			want:      true,
+		},
+		{
+			indexType: "ODINANN",
 			want:      true,
 		},
 		{

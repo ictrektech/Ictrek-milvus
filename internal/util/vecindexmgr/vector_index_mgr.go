@@ -106,14 +106,13 @@ func (mgr *vecIndexMgrImpl) IsNoTrainIndex(indexType IndexType) bool {
 }
 
 func (mgr *vecIndexMgrImpl) IsDiskANN(indexType IndexType) bool {
-	return indexType == "DISKANN"
+	return indexType == "DISKANN" || indexType == "ODINANN"
 }
 
 func (mgr *vecIndexMgrImpl) init() {
 	size := int(C.GetIndexListSize())
 	if size == 0 {
 		log.Error("get empty vector index features from vector index engine")
-		return
 	}
 	vecIndexList := make([]unsafe.Pointer, size)
 	vecIndexFeatures := make([]uint64, size)
@@ -126,6 +125,15 @@ func (mgr *vecIndexMgrImpl) init() {
 		mgr.features[key] = vecIndexFeatures[i]
 		featureLog.WriteString(key + " : " + fmt.Sprintf("%d", vecIndexFeatures[i]) + ",")
 	}
+	
+	// Add ODINANN features explicitly if not already registered
+	// ODINANN is a disk-based index similar to DISKANN, supporting float32, float16, bfloat16
+	// with disk storage and mmap support
+	if _, ok := mgr.features["ODINANN"]; !ok {
+		mgr.features["ODINANN"] = Float32Flag | Float16Flag | BFloat16Flag | DiskFlag | MmapFlag
+		log.Info("ODINANN index features added explicitly")
+	}
+	
 	log.Info("init vector indexes with features : " + featureLog.String())
 }
 
@@ -227,6 +235,10 @@ func (mgr *vecIndexMgrImpl) IsMMapSupported(indexType IndexType) bool {
 }
 
 func (mgr *vecIndexMgrImpl) IsVecIndex(indexType IndexType) bool {
+	// ODINANN may not be registered in the C++ layer yet, so we explicitly check for it
+	if indexType == "ODINANN" {
+		return true
+	}
 	_, ok := mgr.GetFeature(indexType)
 	return ok
 }

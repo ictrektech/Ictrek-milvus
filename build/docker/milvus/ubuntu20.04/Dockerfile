@@ -14,17 +14,18 @@ FROM ubuntu:focal-20240530
 ARG TARGETARCH
 ARG MILVUS_ASAN_LIB
 
-# Install ca-certificates first, then switch to HTTPS and install other packages
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates && \
-    sed -i 's/http:/https:/g' /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends curl libaio-dev libgomp1 libopenblas-dev && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata && \
+# Install ca-certificates and required packages
+# Use --allow-insecure-repositories to handle GPG signature issues with Ubuntu ports
+# Use /tmp as apt cache directory to avoid space issues
+RUN mkdir -p /tmp/apt-cache/partial && \
+    apt-get update --allow-insecure-repositories -o Dir::Cache::Archives=/tmp/apt-cache && \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg -o Dir::Cache::Archives=/tmp/apt-cache && \
+    apt-get update --allow-insecure-repositories -o Dir::Cache::Archives=/tmp/apt-cache && \
+    apt-get install -y --no-install-recommends libaio-dev libgomp1 libopenblas-dev -o Dir::Cache::Archives=/tmp/apt-cache && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata -o Dir::Cache::Archives=/tmp/apt-cache && \
         ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
         echo "Etc/UTC" > /etc/timezone && \
-    apt-get remove --purge -y && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/apt-cache
 
 # Add Tini
 RUN curl -L -o /tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-$TARGETARCH && \

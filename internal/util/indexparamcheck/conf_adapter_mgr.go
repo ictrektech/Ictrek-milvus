@@ -37,7 +37,9 @@ type indexCheckerMgrImpl struct {
 func (mgr *indexCheckerMgrImpl) GetChecker(indexType string) (IndexChecker, error) {
 	mgr.once.Do(mgr.registerIndexChecker)
 	// Unify the vector index checker
-	if vecindexmgr.GetVecIndexMgrInstance().IsVecIndex(indexType) {
+	// Note: ODINANN is handled as a vector index, but may not be registered in the C++ layer yet
+	// So we explicitly check for it here
+	if vecindexmgr.GetVecIndexMgrInstance().IsVecIndex(indexType) || indexType == "ODINANN" {
 		return mgr.checkers[IndexVector], nil
 	}
 	adapter, ok := mgr.checkers[indexType]
